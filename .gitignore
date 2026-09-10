@@ -1,0 +1,10 @@
+# Keep this repository source-only. Build products and flow runs can be
+# regenerated from the files explicitly included below.
+/*
+!/.gitignore
+!/Makefile
+!/common.mk
+!/config.json
+!/rtl/
+!/rtl/**
+!/tb/
