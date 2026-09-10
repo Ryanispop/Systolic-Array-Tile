@@ -1,0 +1,7 @@
+read_liberty /foss/pdks/ciel/sky130/versions/b344c97eacc2aaf8e14ae7e43e2e9dc0871de2c0/sky130A/libs.ref/sky130_fd_sc_hd/lib/sky130_fd_sc_hd__tt_025C_1v80.lib
+read_verilog synth/mac_array_2x2_sky130.v
+link_design mac_array_2x2
+read_sdc synth/mac_array_2x2.sdc
+report_checks
+report_wns
+report_tns
