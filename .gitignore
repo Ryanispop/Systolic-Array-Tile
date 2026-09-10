@@ -4,7 +4,9 @@
 !/.gitignore
 !/Makefile
 !/common.mk
+!/README.md
 !/config.json
 !/rtl/
 !/rtl/**
 !/tb/
+!/build/
