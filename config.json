@@ -1,14 +1,29 @@
 {
-  "DESIGN_NAME": "mac_array_2x2",
+  "DESIGN_NAME": "mac_tile",
+  "PDK": "sky130A",
+  "STD_CELL_LIBRARY": "sky130_fd_sc_hd",
   "VERILOG_FILES": [
     "dir::rtl/mac_pe.sv",
-    "dir::rtl/mac_array_2x2.sv"
+    "dir::rtl/mac_tile.sv"
   ],
+  "SYNTH_PARAMETERS": ["N=2", "DATA_W=8", "ACC_W=32"],
+  "LINTER_DISABLE_WARNINGS_BLACKBOX": ["UNDRIVEN", "UNUSEDSIGNAL", "TIMESCALEMOD"],
   "CLOCK_PORT": "clk",
-  "CLOCK_PERIOD": 10.0,
+  "CLOCK_PERIOD": 30.0,
+  "PNR_SDC_FILE": "dir::constraints/mac_tile.sdc",
+  "SIGNOFF_SDC_FILE": "dir::constraints/mac_tile.sdc",
+  "IO_PIN_ORDER_CFG": "dir::constraints/pin_order.cfg",
 
   "FP_SIZING": "absolute",
   "DIE_AREA": [0, 0, 400, 400],
 
-  "PL_TARGET_DENSITY": 0.45
+  "PL_TARGET_DENSITY_PCT": 45,
+
+  "MAX_SLEW_VIOLATION_CORNERS": ["*"],
+  "MAX_CAP_VIOLATION_CORNERS": ["*"],
+  "RUN_POST_GRT_DESIGN_REPAIR": true,
+  "RUN_POST_GRT_RESIZER_TIMING": true,
+  "GRT_DESIGN_REPAIR_MAX_SLEW_PCT": 30,
+  "GRT_DESIGN_REPAIR_MAX_CAP_PCT": 30,
+  "DEFAULT_CORNER": "max_ss_100C_1v60"
 }

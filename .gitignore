@@ -6,6 +6,8 @@
 !/common.mk
 !/README.md
 !/config.json
+!/constraints/
+!/constraints/**
 !/rtl/
 !/rtl/**
 !/tb/

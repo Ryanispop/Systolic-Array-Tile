@@ -9,6 +9,9 @@ BUILD_DIR ?= build
 SYNTH_DIR ?= synth
 REPORT_DIR ?= reports
 
+# Optional Verilator elaboration arguments, e.g. -GN=4 -GDATA_W=8 -GACC_W=24.
+VERILATOR_FLAGS ?=
+
 SKY130_LIB ?= $(shell find /foss/pdks -name "sky130_fd_sc_hd__tt_025C_1v80.lib" | head -1)
 
 .PHONY: help dirs lint sim sim-iverilog wave synth synth-sky130 sta clean
@@ -20,15 +23,15 @@ dirs:
 	mkdir -p $(BUILD_DIR) $(SYNTH_DIR) $(REPORT_DIR)
 
 lint:
-	verilator --lint-only -Wall rtl/*.sv tb/$(TOP).sv --top-module $(TOP)
+	verilator --lint-only --timing -Wall $(VERILATOR_FLAGS) rtl/*.sv tb/$(TOP).sv --top-module $(TOP)
 
 sim:
-	verilator --binary -Wall --trace rtl/*.sv tb/$(TOP).sv --top-module $(TOP)
+	verilator --binary --timing -Wall --trace $(VERILATOR_FLAGS) rtl/*.sv tb/$(TOP).sv --top-module $(TOP)
 	./obj_dir/V$(TOP)
 
 sim-iverilog:
 	mkdir -p $(BUILD_DIR)
-	iverilog -g2012 -o $(BUILD_DIR)/$(TOP).out $(RTL_DIR)/*.sv $(TB_DIR)/$(TOP).sv
+	iverilog -g2012 -s $(TOP) -o $(BUILD_DIR)/$(TOP).out $(RTL_DIR)/*.sv $(TB_DIR)/$(TOP).sv
 	vvp $(BUILD_DIR)/$(TOP).out
 
 wave:
@@ -60,3 +63,15 @@ sta: $(SYNTH_DIR)/$(DUT)_sky130.v $(SYNTH_DIR)/$(DUT).sdc
 
 clean:
 	rm -rf obj_dir $(BUILD_DIR) $(SYNTH_DIR) $(REPORT_DIR) dump.vcd *.vcd
+
+.PHONY: test-tile
+test-tile:
+	$(MAKE) -f common.mk TOP=tb_mac_tile DUT=mac_tile VERILATOR_FLAGS='-GN=1 -GDATA_W=4 -GACC_W=8' lint sim
+	$(MAKE) -f common.mk TOP=tb_mac_tile DUT=mac_tile VERILATOR_FLAGS='-GN=2 -GDATA_W=8 -GACC_W=32' lint sim
+	$(MAKE) -f common.mk TOP=tb_mac_tile DUT=mac_tile VERILATOR_FLAGS='-GN=3 -GDATA_W=5 -GACC_W=16' lint sim
+	$(MAKE) -f common.mk TOP=tb_mac_tile DUT=mac_tile VERILATOR_FLAGS='-GN=4 -GDATA_W=8 -GACC_W=12' lint sim
+	$(MAKE) -f common.mk TOP=tb_mac_tile DUT=mac_tile VERILATOR_FLAGS='-GN=2 -GDATA_W=8 -GACC_W=4' lint sim
+	$(MAKE) -f common.mk TOP=tb_mac_tile DUT=mac_tile VERILATOR_FLAGS='-GN=2 -GDATA_W=12 -GACC_W=32' lint sim
+	$(MAKE) -f common.mk TOP=tb_mac_pe DUT=mac_pe lint sim
+	$(MAKE) -f common.mk TOP=tb_skew_unit DUT=skew_unit lint sim
+	$(MAKE) -f common.mk TOP=tb_mac_array_2x2 DUT=mac_array_2x2 lint sim
