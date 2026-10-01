@@ -1,5 +1,5 @@
-# Keep this repository source-only. Build products and flow runs can be
-# regenerated from the files explicitly included below.
+# Keep source files and a small, explicitly selected results snapshot.
+# Full build products and flow runs remain excluded.
 /*
 !/.gitignore
 !/Makefile
@@ -12,3 +12,12 @@
 !/rtl/**
 !/tb/
 !/build/
+!/results/
+/results/*
+!/results/tile_wire_repair_100/
+/results/tile_wire_repair_100/*
+!/results/tile_wire_repair_100/README.md
+!/results/tile_wire_repair_100/mac_tile.png
+!/results/tile_wire_repair_100/metrics.json
+!/results/tile_wire_repair_100/timing-summary.rpt
+!/results/tile_wire_repair_100/manufacturability.rpt

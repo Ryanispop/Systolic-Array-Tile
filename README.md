@@ -21,6 +21,40 @@ and `ACC_W=32`. The original standalone 2x2 blocks remain available:
 The checked-in LibreLane `config.json` targets `mac_tile` with Sky130 HD,
 `N=2`, `DATA_W=8`, `ACC_W=32`, a 400 um by 400 um die, and a 30 ns clock target.
 
+## Physical implementation results
+
+The default 2x2 tile has been synthesized, placed, and routed in Sky130 HD.
+The `tile_wire_repair_100` run produced GDS with clean DRC, LVS, and antenna
+checks. Electrical closure is still in progress: two capacitance violations
+and 21 clock-tree fanout violations remain. The strict capacitance checker
+therefore returns a failure status despite the generated layout.
+
+![Routed 2x2 MAC tile in Sky130 HD](results/tile_wire_repair_100/mac_tile.png)
+
+*LibreLane-generated layout render from `tile_wire_repair_100`; 400 x 400 um
+core-block die, without a pad ring.*
+
+| Metric | Result |
+| --- | ---: |
+| Clock target | 30 ns (~33.3 MHz) |
+| Standard-cell area | 36,501.3 um² |
+| Worst setup slack across analyzed corners | +3.496 ns |
+| Worst hold slack across analyzed corners | +0.109 ns |
+| Setup / hold violations | 0 / 0 |
+| Worst-corner slew / capacitance violations | 0 / 2 |
+| Maximum fanout violations | 21 |
+| Magic / KLayout DRC errors | 0 / 0 |
+| LVS errors / antenna violations | 0 / 0 |
+
+Compared with `tile_extra_excluded`, wire-length repair reduced slew violations
+from 25 to 0 and capacitance violations from 7 to 2, with about 3.4% more
+standard-cell area. These are implementation results under the configured
+constraints, not measured silicon performance or a tapeout-ready claim.
+
+The [results snapshot](results/tile_wire_repair_100/README.md) contains the
+original timing summary, metrics, manufacturability report, and render.
+Full runs, netlists, waveform dumps, and GDS binaries are not committed.
+
 ## Quick start
 
 Requirements: GNU Make, Verilator, Icarus Verilog, Yosys, and OpenSTA. Sky130
@@ -125,6 +159,23 @@ change tile dimensions and widths, and reassess pin capacity, die size, and
 timing when scaling the design. This flow builds a core block, without a pad ring.
 Configuration reference: [LibreLane step variables](https://librelane.readthedocs.io/en/latest/reference/step_config_vars.html).
 
+## Electrical repair baseline
+
+The configuration sets `DESIGN_REPAIR_MAX_WIRE_LENGTH` and
+`GRT_DESIGN_REPAIR_MAX_WIRE_LENGTH` to 100 um. This gives placement and
+global-routing repair a finite wire-length target for buffer insertion.
+In the installed tool version, the previous zero setting still allowed some
+buffer insertion; it should not be interpreted as disabling all buffering.
+
+The `tile_wire_repair_100` experiment reduced worst-corner slew violations
+from 25 to 0 and capacitance violations from 7 to 2 relative to
+`tile_extra_excluded`, at the same 30 ns clock target and external constraints.
+Extracted worst setup/hold slacks were +3.496 ns / +0.109 ns. The remaining
+capacitance violations and 21 clock-tree fanout violations still need review;
+this is an improved baseline, not complete electrical closure. All-corner
+slew/capacitance checkers remain enabled, so the remaining capacitance failures
+still cause the full flow to return a failure status.
+
 ## Toward a hardened tile and GDSII
 
 1. Choose the target tile size and external interface. The current parallel
@@ -139,5 +190,5 @@ Configuration reference: [LibreLane step variables](https://librelane.readthedoc
 5. Archive the reproducible flow configuration and signoff reports, then export
    the final GDSII only after DRC/LVS and timing closure are clean.
 
-`runs/`, `obj_dir/`, physical results, reports, and waveform files remain out
-of Git because they are reproducible artifacts rather than design source.
+Full `runs/`, `obj_dir/`, physical outputs, and waveform files remain out of Git.
+Only the small, explicitly allow-listed snapshot in `results/` is included.
